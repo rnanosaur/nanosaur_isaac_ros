@@ -1,0 +1,6 @@
+- git:
+    local-name: isaac_ros_common
+    uri: https://github.com/NVIDIA-AI-IOT/isaac_ros_common.git
+- git:
+    local-name: isaac_ros_image_pipeline
+    uri: https://github.com/NVIDIA-AI-IOT/isaac_ros_image_pipeline.git
