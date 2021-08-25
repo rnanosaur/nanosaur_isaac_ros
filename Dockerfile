@@ -75,6 +75,12 @@ RUN python3 -m pip install -U \
 RUN python3 -m pip install -U \
     scikit-learn
 
+# Install Git-LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+        apt-get update && apt-get install -y \
+        git-lfs \
+&& rm -rf /var/lib/apt/lists/*
+
 # Download and build nanosaur_isaac_ros
 ENV ROS_WS /opt/ros_ws
 RUN mkdir -p $ROS_WS/src
