@@ -18,12 +18,34 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-version: "3.9"
-services:
-  nanosaur_isaac: 
-    image: nanosaur/nanosaur_isaac_ros:latest
-    network_mode: "host"
-    restart: always
-    volumes:
-     - "/usr/share/vpi1:/usr/share/vpi1"
-     - "/opt/nvidia:/opt/nvidia"
+from setuptools import setup
+# Launch command
+from os import path
+from glob import glob
+
+package_name = 'nanosaur_isaac_follower'
+
+here = path.abspath(path.dirname(__file__))
+
+setup(
+    name=package_name,
+    version='0.1.0',
+    packages=[package_name],
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (path.join('share', package_name), glob('launch/*.py'))
+    ],
+    zip_safe=True,
+    maintainer='Raffaello Bonghi',
+    maintainer_email='rbonghi@nvidia.com',
+    description='NanoSaur Isaac ROS follower',
+    license='MIT',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'nanosaur_follower = nanosaur_isaac_follower.follower:main',
+        ],
+    },
+)

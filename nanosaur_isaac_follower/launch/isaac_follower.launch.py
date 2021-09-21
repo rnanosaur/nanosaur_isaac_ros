@@ -18,12 +18,12 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-version: "3.9"
-services:
-  nanosaur_isaac: 
-    image: nanosaur/nanosaur_isaac_ros:latest
-    network_mode: "host"
-    restart: always
-    volumes:
-     - "/usr/share/vpi1:/usr/share/vpi1"
-     - "/opt/nvidia:/opt/nvidia"
+import os
+import launch
+
+def generate_launch_description():
+    
+    return launch.LaunchDescription([
+        
+    ])
+# EOF

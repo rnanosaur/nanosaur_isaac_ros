@@ -21,71 +21,16 @@
 # Jetpack 4.6
 FROM dustynv/ros:foxy-ros-base-l4t-r32.6.1
 
-# Disable terminal interaction for apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Fundamentals
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    curl \
-    git \
-    sudo \
-    unzip \
-    vim \
-    wget \
-    software-properties-common \
-&& rm -rf /var/lib/apt/lists/*
-
 # Install OpenCV dependencies
-RUN apt-get update && apt-get install -y \
-    libavformat-dev \
-    libjpeg-dev \
-    libopenjp2-7-dev \
-    libpng-dev \
-    libpq-dev \
-    libswscale-dev \
-    libtbb2 \
-    libtbb-dev \
-    libtiff-dev \
-    pkg-config \
-    yasm \
-&& rm -rf /var/lib/apt/lists/*
-
-# Install additional packages needed for ROS2 dependencies
-RUN apt-get update && apt-get install -y \
-    python3-distutils \
-    libboost-all-dev \
-    libboost-dev \
-&& rm -rf /var/lib/apt/lists/*
-
-# sklearn dependencies
-RUN apt-get update && apt-get install -y \
-    gfortran \
-    libatlas-base-dev \
-    python3-scipy \
-&& rm -rf /var/lib/apt/lists/*
-
-# sklearn Python dependencies
-RUN python3 -m pip install -U \
-    Cython \
-    wheel
-
-# Install sklearn
-RUN python3 -m pip install -U \
-    scikit-learn
-
-# Install Git-LFS
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-        apt-get update && apt-get install -y \
-        git-lfs \
-&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install libjpeg-dev zlib1g-dev -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Download and build nanosaur_isaac_ros
 ENV ROS_WS /opt/ros_ws
 RUN mkdir -p $ROS_WS/src
 # Copy wstool isaac_ros.rosinstall
-COPY isaac_ros.rosinstall isaac_ros.rosinstall
+COPY nanosaur_isaac_ros/rosinstall/isaac_ros.rosinstall isaac_ros.rosinstall
 
 # Initialize ROS2 workspace
 RUN pip3 install wheel && \

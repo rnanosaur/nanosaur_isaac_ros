@@ -18,12 +18,20 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-version: "3.9"
-services:
-  nanosaur_isaac: 
-    image: nanosaur/nanosaur_isaac_ros:latest
-    network_mode: "host"
-    restart: always
-    volumes:
-     - "/usr/share/vpi1:/usr/share/vpi1"
-     - "/opt/nvidia:/opt/nvidia"
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile
+
+class Follower(Node):
+    
+    def __init__(self):
+        super().__init__('nanosaur_follower')
+
+def main(args=None):
+    rclpy.init(args=args)
+    # Start Nanosaur
+    follower = Follower()
+
+if __name__ == '__main__':
+    main()
+# EOF
