@@ -72,7 +72,8 @@ RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
     --cmake-args \
     -DCMAKE_BUILD_TYPE=Release
 
-ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+# ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Change workdir
 WORKDIR $ROS_WS
 # source ros package from entrypoint

@@ -24,6 +24,14 @@ import launch
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 
+
+# detect all 36h11 tags
+cfg_36h11 = {
+    'image_transport': 'raw',
+    'family': '36h11',
+    'size': 0.162
+}
+
 def generate_launch_description():
     
     rectify_node = ComposableNode(
@@ -44,11 +52,12 @@ def generate_launch_description():
     apriltag_exe = Node(
         package='isaac_ros_apriltag',
         executable='isaac_ros_apriltag',
-        name='apriltag_exe',
+        name='isaac_ros_apriltag',
+        #parameters=[cfg_36h11]
     )
     
     return launch.LaunchDescription([
-        rectify_container,
+        #rectify_container,
         apriltag_exe,
     ])
 # EOF
