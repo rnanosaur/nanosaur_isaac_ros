@@ -80,5 +80,5 @@ RUN sed --in-place --expression \
       '$isource "$ROS_WS/install/setup.bash"' \
       /ros_entrypoint.sh
 # run ros package launch file
-# CMD ["ros2", "launch", "nanosaur_isaac_follower", "isaac_follower.launch.py"]
+CMD ["ros2", "launch", "nanosaur_isaac_follower", "isaac_follower.launch.py"]
 

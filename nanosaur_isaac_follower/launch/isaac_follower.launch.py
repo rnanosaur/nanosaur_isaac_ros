@@ -21,9 +21,34 @@
 import os
 import launch
 
+from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.descriptions import ComposableNode
+
 def generate_launch_description():
     
+    rectify_node = ComposableNode(
+        package='isaac_ros_image_proc',
+        plugin='isaac_ros::image_proc::RectifyNode',
+        name='rectify_node',
+    )
+
+    rectify_container = ComposableNodeContainer(
+        name='rectify_container',
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container',
+        composable_node_descriptions=[rectify_node],
+        output='screen'
+    )
+
+    apriltag_exe = Node(
+        package='isaac_ros_apriltag',
+        executable='isaac_ros_apriltag',
+        name='apriltag_exe',
+    )
+    
     return launch.LaunchDescription([
-        
+        rectify_container,
+        apriltag_exe,
     ])
 # EOF
