@@ -16,7 +16,7 @@ docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nv
 
 Edit docker
 ```
-docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia -v $HOME/nanosaur_isaac_ros/src:/opt/ros_ws/src/ nanosaur/nanosaur_isaac_ros:latest bash
+docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia -v $HOME/nanosaur_isaac_ros:/opt/ros_ws/src nanosaur/nanosaur_isaac_ros:latest bash
 ```
 
 ## Rebuild packages

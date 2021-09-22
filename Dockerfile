@@ -26,31 +26,51 @@ RUN apt-get update && \
     apt-get install libjpeg-dev zlib1g-dev -y && \
     rm -rf /var/lib/apt/lists/*
 
+########### INSTALL ISAAC ROS ###########
+
 # Download and build nanosaur_isaac_ros
-ENV ROS_WS /opt/ros_ws
-RUN mkdir -p $ROS_WS/src
+ENV ISAAC_ROS_WS /opt/isaac_ros_ws
+RUN mkdir -p $ISAAC_ROS_WS/src
 # Copy wstool isaac_ros.rosinstall
 COPY nanosaur_isaac_ros/rosinstall/isaac_ros.rosinstall isaac_ros.rosinstall
 
 # Initialize ROS2 workspace
 RUN pip3 install wheel && \
     pip3 install -U wstool && \
-    wstool init $ROS_WS/src && \
-    wstool merge -t $ROS_WS/src isaac_ros.rosinstall && \
-    wstool update -t $ROS_WS/src
+    wstool init $ISAAC_ROS_WS/src && \
+    wstool merge -t $ISAAC_ROS_WS/src isaac_ros.rosinstall && \
+    wstool update -t $ISAAC_ROS_WS/src
 
 ADD libs/vpi1/ /usr/share/vpi1/
 ADD libs/nvidia/vpi1/ /opt/nvidia/vpi1/
 
 # Load ROS2 sources
 RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
-    cd /$ROS_WS && \
+    cd $ISAAC_ROS_WS && \
     colcon build --symlink-install \
     --cmake-args \
     -DCMAKE_BUILD_TYPE=Release
 
+# Remove VPI after build docker
 RUN rm -R /usr/share/vpi1/
 RUN rm -R /opt/nvidia/vpi1/
+
+########### INSTALL NANOSAUR ISAAC ROS ###########
+
+# Download and build nanosaur_isaac_ros
+ENV ROS_WS /opt/ros_ws
+RUN mkdir -p $ROS_WS/src
+
+ADD . $ROS_WS/src/nanosaur_isaac_ros
+RUN rm -R $ROS_WS/src/nanosaur_isaac_ros/libs
+
+# Load ROS2 sources
+RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
+    . $ISAAC_ROS_WS/install/setup.sh && \
+    cd $ROS_WS && \
+    colcon build --symlink-install \
+    --cmake-args \
+    -DCMAKE_BUILD_TYPE=Release
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 # Change workdir
@@ -59,4 +79,6 @@ WORKDIR $ROS_WS
 RUN sed --in-place --expression \
       '$isource "$ROS_WS/install/setup.bash"' \
       /ros_entrypoint.sh
+# run ros package launch file
+# CMD ["ros2", "launch", "nanosaur_isaac_follower", "isaac_follower.launch.py"]
 

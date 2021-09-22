@@ -1,4 +1,3 @@
-#!/bin/bash
 # Copyright (c) 2021, NVIDIA CORPORATION. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -18,28 +17,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
-bold=`tput bold`
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-reset=`tput sgr0`
-
-PLATFORM="$(uname -m)"
-
-if [[ $PLATFORM != "aarch64" ]]; then
-    echo "${red}Run this script only on ${bold}${green}NVIDIA${reset}${red} Jetson platform${reset}"
-    exit 33
-fi
-
-#Workaround build with VPI
-if [ ! -d libs/nvidia/ ] ; then
-    echo "${bold}[Workaround]${reset} local copy VPI library"
-    mkdir -p libs/nvidia/
-    cp -R /usr/share/vpi1/ libs/vpi1
-    cp -R /opt/nvidia/vpi1/ libs/nvidia/vpi1/
-fi
-
-# Build docker ISAAC GEMS for ROS
-echo "Build ISAAC GEMs for ROS"
-docker build -t nanosaur/nanosaur_isaac_ros:latest .
