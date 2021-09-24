@@ -35,9 +35,9 @@ class Follower(Node):
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
-        self.joint_pub = self.create_publisher(Twist, 'nav_vel', qos_profile)
+        self.pub_nav_ = self.create_publisher(Twist, 'nav_vel', qos_profile)
         # Create command eyes publisher
-        self.joint_pub = self.create_publisher(Eyes, 'eyes', qos_profile)
+        self.pub_eyes_ = self.create_publisher(Eyes, 'eyes', qos_profile)
         # Subscribe to AprilTag Detection message
         self.subscription = self.create_subscription(
             AprilTagDetectionArray,
@@ -47,7 +47,23 @@ class Follower(Node):
         self.subscription  # prevent unused variable warning
         # Node started
         self.get_logger().info("Hello Follower!")
-        
+
+    def move_eyes(self, center):
+        eyes_msg = Eyes()
+        # Convert center
+        eyes_msg.x = -2 * (center.x - 160)/ 320.0 * 100.0
+        eyes_msg.y = (center.y - 160) / 240.0 * 100.0
+        self.get_logger().info(f"[{eyes_msg.x:.0f}, {eyes_msg.y:.0f}]")
+        # Wrap to Eyes message
+        self.pub_eyes_.publish(eyes_msg)
+
+    def drive_robot(self, center):
+        twist = Twist()
+        # Convert center
+        twist.angular.z = -0.1 * (center.x - 160)/ 320.0 * 100.0
+        # Wrap to Eyes message
+        self.pub_nav_.publish(twist)
+
     def april_tag(self, msg):
         if msg.detections:
             for detect in msg.detections:
@@ -56,6 +72,8 @@ class Follower(Node):
                     # If Detect the april tag, enable follow
                     if detect.id == self.april_tag_id:
                         self.get_logger().info(f"DETECTED! [{center.x:.2f}, {center.y:.2f}]")
+                        self.move_eyes(center)
+                        self.drive_robot(center)
                         break
                     else:
                         self.get_logger().info(f"ID {detect.id} [{center.x:.2f}, {center.y:.2f}]")
