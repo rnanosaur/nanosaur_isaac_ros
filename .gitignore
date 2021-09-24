@@ -1,2 +1,19 @@
+# Compiled python modules.
+*.pyc
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# log file
+*.log
+
+# Unit test / coverage reports
+.tox/
+.cache/
+swapfile
+
+# Visual Studio Code
+.vscode/
+
 libs/
 src/

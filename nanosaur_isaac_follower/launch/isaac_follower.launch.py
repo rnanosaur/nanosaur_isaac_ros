@@ -21,8 +21,10 @@
 import os
 import launch
 
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
+import launch_ros
 
 
 # detect all 36h11 tags
@@ -33,31 +35,48 @@ cfg_36h11 = {
 }
 
 def generate_launch_description():
+    pkg_nanosaur_isaac = launch_ros.substitutions.FindPackageShare(package='nanosaur_isaac_follower').find('nanosaur_isaac_follower')
     
-    rectify_node = ComposableNode(
-        package='isaac_ros_image_proc',
-        plugin='isaac_ros::image_proc::RectifyNode',
-        name='rectify_node',
-    )
-
-    rectify_container = ComposableNodeContainer(
-        name='rectify_container',
-        namespace='',
-        package='rclcpp_components',
-        executable='component_container',
-        composable_node_descriptions=[rectify_node],
+    follower_config = os.path.join(pkg_nanosaur_isaac, 'param', 'follower.yml')
+    follower_dir = LaunchConfiguration('follower_dir', default=follower_config)
+    
+    follower_node = launch_ros.actions.Node(
+        package='nanosaur_isaac_follower',
+        executable='nanosaur_follower',
+        name='nanosaur_follower',
+        parameters=[follower_dir] if os.path.isfile(follower_config) else [],
         output='screen'
-    )
+    )    
+    
+    #rectify_node = ComposableNode(
+    #    package='isaac_ros_image_proc',
+    #    plugin='isaac_ros::image_proc::RectifyNode',
+    #    name='rectify_node',
+    #)
+
+    #rectify_container = ComposableNodeContainer(
+    #    name='rectify_container',
+    #    namespace='',
+    #    package='rclcpp_components',
+    #    executable='component_container',
+    #    composable_node_descriptions=[rectify_node],
+    #    output='screen'
+    #)
 
     apriltag_exe = Node(
         package='isaac_ros_apriltag',
         executable='isaac_ros_apriltag',
-        name='isaac_ros_apriltag',
+        name='apriltag_exe',
         #parameters=[cfg_36h11]
     )
     
     return launch.LaunchDescription([
         #rectify_container,
+        # Isaac GEMs for ROS
+        # April Tag node
         apriltag_exe,
+        # Nanosaur follower driver
+        # Take pictures from the apriltag node and follow a tag
+        follower_node
     ])
 # EOF
