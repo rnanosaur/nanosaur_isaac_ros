@@ -32,6 +32,19 @@ class Follower(Node):
         # Get ID to follow
         self.declare_parameter("id", 4)
         self.april_tag_id = self.get_parameter("id").value
+        # Get frame size to follow
+        self.declare_parameter("frame.width", 320.0)
+        self.frame_width = self.get_parameter("frame.width").value
+        self.declare_parameter("frame.height", 240.0)
+        self.frame_height = self.get_parameter("frame.height").value
+        # Gain eyes message
+        self.declare_parameter("gain.eyes.x", 2)
+        self.gain_eyes_x = self.get_parameter("gain.eyes.x").value
+        self.declare_parameter("gain.eyes.y", 2)
+        self.gain_eyes_y = self.get_parameter("gain.eyes.y").value
+        # Gain control motor
+        self.declare_parameter("gain.control", 1)
+        self.gain_control = self.get_parameter("gain.control").value
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
@@ -48,19 +61,19 @@ class Follower(Node):
         # Node started
         self.get_logger().info("Hello Follower!")
 
-    def move_eyes(self, center):
+    def move_eyes(self, error_x, error_y):
         eyes_msg = Eyes()
-        # Convert center
-        eyes_msg.x = -2 * (center.x - 160)/ 320.0 * 100.0
-        eyes_msg.y = (center.y - 160) / 240.0 * 100.0
+        # Convert center to eye movement
+        eyes_msg.x = self.gain_eyes_x * error_x
+        eyes_msg.y = self.gain_eyes_y * error_y
         self.get_logger().info(f"[{eyes_msg.x:.0f}, {eyes_msg.y:.0f}]")
         # Wrap to Eyes message
         self.pub_eyes_.publish(eyes_msg)
 
-    def drive_robot(self, center):
+    def drive_robot(self, error_x, error_y):
         twist = Twist()
-        # Convert center
-        twist.angular.z = -0.1 * (center.x - 160)/ 320.0 * 100.0
+        # Control motor center
+        twist.angular.z = self.gain_control * error_x
         # Wrap to Eyes message
         self.pub_nav_.publish(twist)
 
@@ -69,15 +82,18 @@ class Follower(Node):
             for detect in msg.detections:
                 if detect.family == '36h11':
                     center = detect.center
+                    # measure error Qr code
+                    error_x = -100.0 * (center.x - (self.frame_width / 2.))/ self.frame_width
+                    error_y = 100.0 * (center.y - (self.frame_height / 2.)) / self.frame_height
                     # If Detect the april tag, enable follow
+                    self.get_logger().info(f"ID {detect.id} [{error_x:.2f}, {error_y:.2f}]")
+                    # If detect QR code
                     if detect.id == self.april_tag_id:
-                        self.get_logger().info(f"DETECTED! [{center.x:.2f}, {center.y:.2f}]")
-                        self.move_eyes(center)
-                        self.drive_robot(center)
+                        self.move_eyes(error_x, error_y)
+                        self.drive_robot(error_x, error_y)
                         break
-                    else:
-                        self.get_logger().info(f"ID {detect.id} [{center.x:.2f}, {center.y:.2f}]")
-        #self.get_logger().info(f"{msg}")
+        # Stop motors
+        self.pub_nav_.publish(Twist())
 
 def main(args=None):
     rclpy.init(args=args)
