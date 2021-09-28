@@ -6,7 +6,7 @@ Nanosaur ISAAC ROS integration
 
 Build docker
 ```
-./isaac_ros_build.sh
+. nanosaur_isaac_ros/scripts/build_isaac_ros.sh 
 ```
 
 Run docker
@@ -22,6 +22,13 @@ docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nv
 ## Rebuild packages
 
 Rebuild all packages: `colcon build --symlink-install`
+
+## Publish
+
+Remember to login before run this script!
+```
+. nanosaur_isaac_ros/scripts/push_isaac_ros.sh 
+```
 
 # reference
 

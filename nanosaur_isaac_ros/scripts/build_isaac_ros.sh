@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (c) 2021, NVIDIA CORPORATION. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -18,12 +19,30 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-version: "3.9"
-services:
-  nanosaur_isaac: 
-    image: nanosaur/isaac_ros:latest
-    network_mode: "host"
-    restart: always
-    volumes:
-     - "/usr/share/vpi1:/usr/share/vpi1"
-     - "/opt/nvidia:/opt/nvidia"
+bold=`tput bold`
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+reset=`tput sgr0`
+
+PLATFORM="$(uname -m)"
+NANOSAUR_ISAAC_ROS_NAME="nanosaur/isaac_ros"
+
+# Check if is running on NVIDIA Jetson platform
+if [[ $PLATFORM != "aarch64" ]]; then
+    echo "${red}Run this script only on ${bold}${green}NVIDIA${reset}${red} Jetson platform${reset}"
+    exit 33
+fi
+
+PATH_LIBS="libs"
+#Workaround build with VPI
+if [ ! -d $PATH_LIBS/nvidia/ ] ; then
+    echo "${bold}[Workaround]${reset} local copy VPI library"
+    mkdir -p $PATH_LIBS/nvidia/
+    cp -R /usr/share/vpi1/ $PATH_LIBS/vpi1
+    cp -R /opt/nvidia/vpi1/ $PATH_LIBS/nvidia/vpi1/
+fi
+
+# Build docker ISAAC GEMS for ROS
+echo "Build ISAAC GEMs for ROS"
+docker build -t $NANOSAUR_ISAAC_ROS_NAME:main -t $NANOSAUR_ISAAC_ROS_NAME:latest .

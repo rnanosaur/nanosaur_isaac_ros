@@ -26,21 +26,13 @@ yellow=`tput setaf 3`
 reset=`tput sgr0`
 
 PLATFORM="$(uname -m)"
+NANOSAUR_ISAAC_ROS_NAME="nanosaur/isaac_ros"
 
+# Check if is running on NVIDIA Jetson platform
 if [[ $PLATFORM != "aarch64" ]]; then
     echo "${red}Run this script only on ${bold}${green}NVIDIA${reset}${red} Jetson platform${reset}"
     exit 33
 fi
 
-PATH_LIBS="libs"
-#Workaround build with VPI
-if [ ! -d $PATH_LIBS/nvidia/ ] ; then
-    echo "${bold}[Workaround]${reset} local copy VPI library"
-    mkdir -p $PATH_LIBS/nvidia/
-    cp -R /usr/share/vpi1/ $PATH_LIBS/vpi1
-    cp -R /opt/nvidia/vpi1/ $PATH_LIBS/nvidia/vpi1/
-fi
-
-# Build docker ISAAC GEMS for ROS
-echo "Build ISAAC GEMs for ROS"
-docker build -t nanosaur/nanosaur_isaac_ros:latest .
+docker image push $NANOSAUR_ISAAC_ROS_NAME:latest
+docker image push $NANOSAUR_ISAAC_ROS_NAME:main
