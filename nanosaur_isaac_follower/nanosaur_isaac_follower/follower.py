@@ -43,7 +43,7 @@ class Follower(Node):
         self.declare_parameter("gain.eyes.y", 2)
         self.gain_eyes_y = self.get_parameter("gain.eyes.y").value
         # Gain control motor
-        self.declare_parameter("gain.control", 1)
+        self.declare_parameter("gain.control", 0.02)
         self.gain_control = self.get_parameter("gain.control").value
         #Init QoS
         qos_profile = QoSProfile(depth=5)
@@ -61,14 +61,19 @@ class Follower(Node):
             1)
         self.subscription  # prevent unused variable warning
         # Node started
-        self.get_logger().info("Hello Follower!")
+        self.get_logger().info("nanosaur Isaac ROS follower!")
+        self.get_logger().info(f"- Gain control: {self.gain_control}")
+
+    def follower_stop(self):
+        self.pub_nav_.publish(Twist())
+        self.pub_eyes_.publish(Eyes())
 
     def move_eyes(self, error_x, error_y):
         eyes_msg = Eyes()
         # Convert center to eye movement
         eyes_msg.x = self.gain_eyes_x * error_x
         eyes_msg.y = self.gain_eyes_y * error_y
-        self.get_logger().info(f"[{eyes_msg.x:.0f}, {eyes_msg.y:.0f}]")
+        # self.get_logger().info(f"[{eyes_msg.x:.0f}, {eyes_msg.y:.0f}]")
         # Wrap to Eyes message
         self.pub_eyes_.publish(eyes_msg)
 
@@ -76,6 +81,7 @@ class Follower(Node):
         twist = Twist()
         # Control motor center
         twist.angular.z = self.gain_control * error_x
+        self.get_logger().info(f"{twist.angular.z:.1f}")
         # Wrap to Eyes message
         self.pub_nav_.publish(twist)
 
@@ -95,7 +101,7 @@ class Follower(Node):
                         self.drive_robot(error_x, error_y)
                         break
         # Stop motors
-        self.pub_nav_.publish(Twist())
+        #self.pub_nav_.publish(Twist())
 
 def main(args=None):
     rclpy.init(args=args)
@@ -106,6 +112,7 @@ def main(args=None):
         rclpy.spin(follower)
     except (KeyboardInterrupt, SystemExit):
         pass
+    follower.follower_stop()
     # Destroy the node explicitly
     follower.destroy_node()
     rclpy.shutdown()
