@@ -35,7 +35,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (path.join('share', package_name), glob('launch/*.py'))
+        (path.join('share', package_name), glob('launch/*.py')),
+        (path.join('share', package_name), glob('param/*.yml'))
     ],
     zip_safe=True,
     maintainer='Raffaello Bonghi',

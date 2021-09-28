@@ -20,10 +20,13 @@
 
 version: "3.9"
 services:
-  nanosaur_isaac: 
+  isaac_ros:
     image: nanosaur/isaac_ros:latest
     network_mode: "host"
     restart: always
     volumes:
+     # VPI volumes
      - "/usr/share/vpi1:/usr/share/vpi1"
      - "/opt/nvidia:/opt/nvidia"
+     # if you want change the isaac_ros configuration
+     - "/opt/nanosaur/param:/opt/ros_ws/install/nanosaur_isaac_follower/share/nanosaur_isaac_follower/param"
