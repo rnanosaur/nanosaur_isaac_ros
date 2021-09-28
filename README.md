@@ -11,12 +11,12 @@ Build docker
 
 Run docker
 ```
-docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia nanosaur/nanosaur_isaac_ros:latest bash
+docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia nanosaur/isaac_ros:latest bash
 ```
 
 Edit docker
 ```
-docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia -v $HOME/nanosaur_isaac_ros:/opt/ros_ws/src/nanosaur_isaac_ros nanosaur/nanosaur_isaac_ros:latest bash
+docker run --rm -it --network host -v /usr/share/vpi1:/usr/share/vpi1 -v /opt/nvidia:/opt/nvidia -v $HOME/nanosaur_isaac_ros:/opt/ros_ws/src/nanosaur_isaac_ros nanosaur/isaac_ros:latest bash
 ```
 
 ## Rebuild packages

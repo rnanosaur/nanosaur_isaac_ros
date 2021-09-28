@@ -48,7 +48,9 @@ class Follower(Node):
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
-        self.pub_nav_ = self.create_publisher(Twist, 'nav_vel', qos_profile)
+        self.declare_parameter("navigation.topic", 'nav_vel')
+        navigation_topic = self.get_parameter("navigation.topic").value
+        self.pub_nav_ = self.create_publisher(Twist, navigation_topic, qos_profile)
         # Create command eyes publisher
         self.pub_eyes_ = self.create_publisher(Eyes, 'eyes', qos_profile)
         # Subscribe to AprilTag Detection message
