@@ -72,6 +72,9 @@ RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
     --cmake-args \
     -DCMAKE_BUILD_TYPE=Release
 
+# https://docs.docker.com/engine/reference/builder/#stopsignal
+# https://hynek.me/articles/docker-signals/
+STOPSIGNAL SIGINT
 # ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Change workdir

@@ -76,6 +76,7 @@ class Follower(Node):
         self.declare_parameter("gain.control", 0.001)
         self.gain_control = self.get_parameter("gain.control").value
         self.pid_twist = PID(Kp=self.gain_control, Ki=0.0001)
+        self.pid_linear = PID(Kp=0.05)
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
@@ -112,8 +113,9 @@ class Follower(Node):
         twist = Twist()
         # Control motor center
         #twist.angular.z = self.gain_control * error_x + self.gain_control * dist
+        twist.linear.x = self.pid_linear.update(dist)
         twist.angular.z = self.pid_twist.update(error_x / dist)
-        self.get_logger().info(f"{twist.angular.z:.1f}")
+        self.get_logger().info(f"lin: {twist.linear.x:.1f} - ste: {twist.angular.z:.1f}")
         # Wrap to Eyes message
         self.pub_nav_.publish(twist)
 
@@ -148,6 +150,7 @@ class Follower(Node):
             # Stop motors
             self.move_eyes()
             self.pid_twist.reset()
+            self.pid_linear.reset()
             self.pub_nav_.publish(Twist())
 
 def main(args=None):
