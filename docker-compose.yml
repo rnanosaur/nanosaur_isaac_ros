@@ -22,6 +22,8 @@ version: "3.9"
 services:
   isaac_ros:
     image: nanosaur/isaac_ros:latest
+    build: 
+      context: .
     network_mode: "host"
     restart: always
     volumes:
