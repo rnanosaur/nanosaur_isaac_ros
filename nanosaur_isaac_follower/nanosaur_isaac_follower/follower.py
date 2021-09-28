@@ -25,6 +25,36 @@ from nanosaur_msgs.msg import Eyes
 from geometry_msgs.msg import Twist
 from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
 
+class PID:
+    
+    def __init__(self, limit=0.5, Kp=0., Ki=0., Kd=0.):
+        self.Kp = Kp
+        self.Ki = Ki
+        self.Kd = Kd
+        self.limit = limit
+        self.sum_error = 0.
+        self.error = 0.
+
+    def check_limit(self, var):
+        if var > self.limit:
+            return self.limit
+        elif var < -self.limit:
+            return -self.limit
+        else:
+            return var
+
+    def reset(self):
+        self.sum_error = 0.
+
+    def update(self, error):
+        
+        self.sum_error += error
+        e_i = self.check_limit(self.Ki * self.sum_error)
+        
+        self.error = error
+        
+        return self.check_limit(self.Kp * error + e_i)
+
 class Follower(Node):
     
     def __init__(self):
@@ -43,8 +73,9 @@ class Follower(Node):
         self.declare_parameter("gain.eyes.y", 2)
         self.gain_eyes_y = self.get_parameter("gain.eyes.y").value
         # Gain control motor
-        self.declare_parameter("gain.control", 0.02)
+        self.declare_parameter("gain.control", 0.001)
         self.gain_control = self.get_parameter("gain.control").value
+        self.pid_twist = PID(Kp=self.gain_control, Ki=0.0001)
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
@@ -68,7 +99,7 @@ class Follower(Node):
         self.pub_nav_.publish(Twist())
         self.pub_eyes_.publish(Eyes())
 
-    def move_eyes(self, error_x, error_y):
+    def move_eyes(self, error_x=0., error_y=0.):
         eyes_msg = Eyes()
         # Convert center to eye movement
         eyes_msg.x = self.gain_eyes_x * error_x
@@ -77,31 +108,47 @@ class Follower(Node):
         # Wrap to Eyes message
         self.pub_eyes_.publish(eyes_msg)
 
-    def drive_robot(self, error_x, error_y):
+    def drive_robot(self, error_x=0, dist=0):
         twist = Twist()
         # Control motor center
-        twist.angular.z = self.gain_control * error_x
+        #twist.angular.z = self.gain_control * error_x + self.gain_control * dist
+        twist.angular.z = self.pid_twist.update(error_x / dist)
         self.get_logger().info(f"{twist.angular.z:.1f}")
         # Wrap to Eyes message
         self.pub_nav_.publish(twist)
 
+    def length_corner(self, corners):
+        x0 = corners[0].x
+        y0 = corners[0].y
+        x1 = corners[1].x
+        y1 = corners[1].y
+        return ((((x1 - x0)**2) + ((y1 - y0)**2))**0.5)
+
     def april_tag(self, msg):
+        detected = False
         if msg.detections:
             for detect in msg.detections:
                 if detect.family == '36h11':
                     center = detect.center
+                    dist = self.length_corner(detect.corners)
+                    dist = dist / 100
                     # measure error Qr code
-                    error_x = -100.0 * (center.x - (self.frame_width / 2.))/ self.frame_width
-                    error_y = 100.0 * (center.y - (self.frame_height / 2.)) / self.frame_height
+                    error_x = - 200.0 * (center.x - (self.frame_width / 2.)) / self.frame_width
+                    error_y = 200.0 * (center.y - (self.frame_height / 2.)) / self.frame_height
                     # If Detect the april tag, enable follow
-                    self.get_logger().info(f"ID {detect.id} [{error_x:.2f}, {error_y:.2f}]")
+                    self.get_logger().info(f"ID {detect.id} [{error_x:.2f}, {error_y:.2f}] - dist: {dist:.2f}")
                     # If detect QR code
                     if detect.id == self.april_tag_id:
+                        detected = True
                         self.move_eyes(error_x, error_y)
-                        self.drive_robot(error_x, error_y)
+                        self.drive_robot(error_x, dist)
                         break
-        # Stop motors
-        #self.pub_nav_.publish(Twist())
+        if not detected:
+            #self.get_logger().info(f"No detection")
+            # Stop motors
+            self.move_eyes()
+            self.pid_twist.reset()
+            self.pub_nav_.publish(Twist())
 
 def main(args=None):
     rclpy.init(args=args)
