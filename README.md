@@ -32,6 +32,7 @@ Remember to login before run this script!
 
 # reference
 
+* [ISAAC ROS apriltag](https://github.com/NVIDIA-AI-IOT/isaac_ros_apriltag.git)
 * [ISAAC ROS common](https://github.com/NVIDIA-AI-IOT/isaac_ros_common.git)
 * [ISAAC ROS image pipeline](https://github.com/NVIDIA-AI-IOT/isaac_ros_image_pipeline.git)
 * Add VPI for build on Jetson https://forums.developer.nvidia.com/t/vpi-installation-error-in-docker-container/160254/3

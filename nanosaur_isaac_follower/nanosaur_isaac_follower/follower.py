@@ -24,6 +24,7 @@ from rclpy.qos import QoSProfile
 from nanosaur_msgs.msg import Eyes
 from geometry_msgs.msg import Twist
 from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
+# from apriltag_msgs.msg import AprilTagDetectionArray
 
 class PID:
     
@@ -76,7 +77,10 @@ class Follower(Node):
         self.declare_parameter("gain.control", 0.001)
         self.gain_control = self.get_parameter("gain.control").value
         self.pid_twist = PID(Kp=self.gain_control, Ki=0.0001)
-        self.pid_linear = PID(Kp=0.05)
+        
+        self.declare_parameter("gain.linear", 0.05)
+        self.gain_linear = self.get_parameter("gain.linear").value
+        self.pid_linear = PID(Kp=self.gain_linear)
         #Init QoS
         qos_profile = QoSProfile(depth=5)
         # Create command Twist publisher
@@ -113,7 +117,7 @@ class Follower(Node):
         twist = Twist()
         # Control motor center
         #twist.angular.z = self.gain_control * error_x + self.gain_control * dist
-        twist.linear.x = self.pid_linear.update(dist)
+        twist.linear.x = self.pid_linear.update(1 / dist)
         twist.angular.z = self.pid_twist.update(error_x / dist)
         self.get_logger().info(f"lin: {twist.linear.x:.1f} - ste: {twist.angular.z:.1f}")
         # Wrap to Eyes message

@@ -1,4 +1,4 @@
 docker-compose.yml
 Dockerfile
-isaac_ros_build.sh
+Dockerfile.cpu
 README.md
