@@ -61,6 +61,10 @@ RUN rm -R /opt/nvidia/vpi1/
 ENV ROS_WS /opt/ros_ws
 RUN mkdir -p $ROS_WS/src
 
+# Install python dependencies
+ADD nanosaur_isaac_follower/requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+
 ADD . $ROS_WS/src/nanosaur_isaac_ros
 RUN rm -R $ROS_WS/src/nanosaur_isaac_ros/libs
 

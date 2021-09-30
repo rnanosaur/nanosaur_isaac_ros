@@ -26,6 +26,8 @@ from glob import glob
 package_name = 'nanosaur_isaac_follower'
 
 here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    requirements = f.read().splitlines()
 
 setup(
     name=package_name,
@@ -35,9 +37,11 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, ['requirements.txt']),
         (path.join('share', package_name), glob('launch/*.py')),
         (path.join('share', package_name), glob('param/*.yml'))
     ],
+    install_requires=requirements,
     zip_safe=True,
     maintainer='Raffaello Bonghi',
     maintainer_email='rbonghi@nvidia.com',
