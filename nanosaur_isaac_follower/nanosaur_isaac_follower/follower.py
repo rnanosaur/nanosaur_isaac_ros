@@ -50,7 +50,7 @@ class Follower(Node):
         self.declare_parameter("gain.eyes.y", 1)
         self.gain_eyes_y = self.get_parameter("gain.eyes.y").value
         # Gain control motor
-        self.declare_parameter("gain.twist.Kp", 0.010)
+        self.declare_parameter("gain.twist.Kp", 0.012)
         twist_Kp = self.get_parameter("gain.twist.Kp").value
         self.declare_parameter("gain.twist.Ki", 0.00)
         twist_Ki = self.get_parameter("gain.twist.Ki").value
@@ -82,6 +82,8 @@ class Follower(Node):
         self.subscription  # prevent unused variable warning
         # Node started
         self.get_logger().info("nanosaur Isaac ROS follower!")
+        self.get_logger().info(f"- Linear KP:{linear_Kp} KI:{linear_Ki} KD:{linear_Kd}")
+        self.get_logger().info(f"- Twist KP:{twist_Kp} KI:{twist_Ki} KD:{twist_Kd}")
         if not self.isaac_ros:
             self.get_logger().info("APRILTAG CPU!!!")
 
@@ -135,7 +137,9 @@ class Follower(Node):
         lin_control = self.pid_linear(size)
         twist.linear.x = lin_control if lin_control > 0. else 0.
         twist.angular.z = -self.pid_twist(px)
-        self.get_logger().info(f"Detect: {detect} - {size:.2f} | lin: {twist.linear.x:.4f} - ste: {twist.angular.z:.4f}")
+        # self.get_logger().info(f"Detect: {detect} - {size:.2f} | lin: {twist.linear.x:.4f} - ste: {twist.angular.z:.4f}")
+        isaac = "GPU" if self.isaac_ros else "CPU"
+        self.get_logger().info(f"{isaac} Detect: {detect} | S: {size:.2f} Ex [{px:.0f} ,{py:.0f}]")
         self.pub_nav_.publish(twist)
         # Update eyes
         self.move_eyes(px, py)
