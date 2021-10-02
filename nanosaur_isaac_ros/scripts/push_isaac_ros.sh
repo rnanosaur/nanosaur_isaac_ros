@@ -26,7 +26,7 @@ yellow=`tput setaf 3`
 reset=`tput sgr0`
 
 PLATFORM="$(uname -m)"
-NANOSAUR_ISAAC_ROS_NAME="nanosaur/isaac_ros"
+NANOSAUR_ISAAC_ROS_NAME="nanosaur/follower"
 
 # Check if is running on NVIDIA Jetson platform
 if [[ $PLATFORM != "aarch64" ]]; then

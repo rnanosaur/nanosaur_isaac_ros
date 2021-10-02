@@ -18,20 +18,24 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+import os
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 from nanosaur_msgs.msg import Eyes
 from geometry_msgs.msg import Twist
-from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
-# from apriltag_msgs.msg import AprilTagDetectionArray
-
 from simple_pid import PID
+
+if os.getenv("ISAAC_ROS_APRILTAG", 'True') == 'True':
+    from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
+else:
+    from apriltag_msgs.msg import AprilTagDetectionArray
 
 class Follower(Node):
     
     def __init__(self):
         super().__init__('nanosaur_follower')
+        self.isaac_ros = os.getenv("ISAAC_ROS_APRILTAG", 'True') == 'True'
         # Get ID to follow
         self.declare_parameter("id", 4)
         self.april_tag_id = self.get_parameter("id").value
@@ -46,7 +50,7 @@ class Follower(Node):
         self.declare_parameter("gain.eyes.y", 1)
         self.gain_eyes_y = self.get_parameter("gain.eyes.y").value
         # Gain control motor
-        self.declare_parameter("gain.twist.Kp", 0.015)
+        self.declare_parameter("gain.twist.Kp", 0.010)
         twist_Kp = self.get_parameter("gain.twist.Kp").value
         self.declare_parameter("gain.twist.Ki", 0.00)
         twist_Ki = self.get_parameter("gain.twist.Ki").value
@@ -54,7 +58,7 @@ class Follower(Node):
         twist_Kd = self.get_parameter("gain.twist.Kd").value
         self.pid_twist = PID(Kp=twist_Kp, Ki=twist_Ki, Kd=twist_Kd, output_limits=(-0.6, 0.6))
         # Linear follower gains and init PID
-        self.declare_parameter("gain.linear.Kp", 0.0005)
+        self.declare_parameter("gain.linear.Kp", 0.0003)
         linear_Kp = self.get_parameter("gain.linear.Kp").value
         self.declare_parameter("gain.linear.Ki", 0.0)
         linear_Ki = self.get_parameter("gain.linear.Ki").value
@@ -78,6 +82,8 @@ class Follower(Node):
         self.subscription  # prevent unused variable warning
         # Node started
         self.get_logger().info("nanosaur Isaac ROS follower!")
+        if not self.isaac_ros:
+            self.get_logger().info("APRILTAG CPU!!!")
 
     def follower_stop(self):
         self.pub_nav_.publish(Twist())
@@ -102,12 +108,12 @@ class Follower(Node):
     def detect_tag(self, detections):
         tag = {"detect": False, "px": 0., "py": 0., "size": 0.}
         for detect in detections:
-            if detect.family == '36h11':
+            if detect.family == '36h11' if self.isaac_ros else 'tag36h11':
                 # If detect QR code
                 if detect.id == self.april_tag_id:
                     tag["detect"] = True
                     # Center tag
-                    center = detect.center
+                    center = detect.center if self.isaac_ros else detect.centre
                     tag["px"] = - 200.0 * (center.x - (self.frame_width / 2.)) / self.frame_width
                     tag["py"] = 200.0 * (center.y - (self.frame_height / 2.)) / self.frame_height
                     # Size tag

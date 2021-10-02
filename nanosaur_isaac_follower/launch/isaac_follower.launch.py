@@ -66,29 +66,33 @@ def generate_launch_description():
         name='nanosaur_follower',
         parameters=[follower_dir] if os.path.isfile(follower_config) else [],
         output='screen'
-    )    
-    
-    #rectify_node = ComposableNode(
-    #    package='isaac_ros_image_proc',
-    #    plugin='isaac_ros::image_proc::RectifyNode',
-    #    name='rectify_node',
-    #)
-
-    #rectify_container = ComposableNodeContainer(
-    #    name='rectify_container',
-    #    namespace='',
-    #    package='rclcpp_components',
-    #    executable='component_container',
-    #    composable_node_descriptions=[rectify_node],
-    #    output='screen'
-    #)
-
-    apriltag_exe = Node(
-        package='isaac_ros_apriltag',
-        executable='isaac_ros_apriltag',
-        name='apriltag_exe',
-        #parameters=[cfg_36h11]
     )
+
+    if os.getenv("ISAAC_ROS_APRILTAG", 'True') == 'True':
+        apriltag_exe = Node(
+            package='isaac_ros_apriltag',
+            executable='isaac_ros_apriltag',
+            name='apriltag_exe',
+            #parameters=[cfg_36h11]
+        )
+    else:
+        print("RUN APRILTAG CPU")
+        composable_node = ComposableNode(
+            name='apriltag',
+            package='apriltag_ros', plugin='AprilTagNode',
+            remappings=[
+                ("/apriltag/image", "/image_rect"),
+                ("/apriltag/camera_info", "/camera_info"),
+                ("/apriltag/detections", "/tag_detections")],
+            parameters=[cfg_36h11])
+        apriltag_exe = ComposableNodeContainer(
+            name='tag_container',
+            namespace='apriltag',
+            package='rclcpp_components',
+            executable='component_container',
+            composable_node_descriptions=[composable_node],
+            output='screen'
+        )
     
     return launch.LaunchDescription([
         #rectify_container,

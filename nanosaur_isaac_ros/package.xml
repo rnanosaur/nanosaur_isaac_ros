@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>nanosaur_isaac_follower</exec_depend>
+  <exec_depend>rmw_cyclonedds_cpp</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
