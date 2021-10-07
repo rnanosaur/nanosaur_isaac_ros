@@ -56,7 +56,7 @@ def generate_launch_description():
     # Load namespace
     namespace = os.getenv("HOSTNAME") if conf.get("multirobot", False) else ""
     # Follower configuration
-    follower_config = os.path.join(pkg_nanosaur_isaac, 'param', 'follower.yml')
+    follower_config = os.path.join(pkg_nanosaur_isaac, 'param', 'nanosaur.yml')
     follower_dir = LaunchConfiguration('follower_dir', default=follower_config)
     
     follower_node = Node(

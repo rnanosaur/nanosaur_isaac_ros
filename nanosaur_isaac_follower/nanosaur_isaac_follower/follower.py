@@ -40,9 +40,9 @@ class Follower(Node):
         self.declare_parameter("id", 4)
         self.april_tag_id = self.get_parameter("id").value
         # Get frame size to follow
-        self.declare_parameter("frame.width", 320.0)
+        self.declare_parameter("frame.width", 640.0)
         self.frame_width = self.get_parameter("frame.width").value
-        self.declare_parameter("frame.height", 240.0)
+        self.declare_parameter("frame.height", 480.0)
         self.frame_height = self.get_parameter("frame.height").value
         # Gain eyes message
         self.declare_parameter("gain.eyes.x", 1)
@@ -58,7 +58,7 @@ class Follower(Node):
         twist_Kd = self.get_parameter("gain.twist.Kd").value
         self.pid_twist = PID(Kp=twist_Kp, Ki=twist_Ki, Kd=twist_Kd, output_limits=(-0.6, 0.6))
         # Linear follower gains and init PID
-        self.declare_parameter("gain.linear.Kp", 0.0003)
+        self.declare_parameter("gain.linear.Kp", 0.005) # OLD 0.0003
         linear_Kp = self.get_parameter("gain.linear.Kp").value
         self.declare_parameter("gain.linear.Ki", 0.0)
         linear_Ki = self.get_parameter("gain.linear.Ki").value
@@ -130,7 +130,7 @@ class Follower(Node):
         py = tag["py"]
         size = tag["size"]
         # test = ex / (size / 50.) if size > 0 else 0
-        self.pid_linear.setpoint = 120. if tag["detect"] else 0.
+        self.pid_linear.setpoint = 180. if tag["detect"] else 0.
         #self.get_logger().info(f"ID {self.april_tag_id} - Ex: [{px:.1f} - {py:.1f}] - Size: {size:.1f}")
         # Send Drive message
         twist = Twist()
