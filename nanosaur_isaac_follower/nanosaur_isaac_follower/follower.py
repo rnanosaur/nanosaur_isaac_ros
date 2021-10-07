@@ -40,9 +40,9 @@ class Follower(Node):
         self.declare_parameter("id", 4)
         self.april_tag_id = self.get_parameter("id").value
         # Get frame size to follow
-        self.declare_parameter("frame.width", 640.0)
+        self.declare_parameter("frame.width", 320.0)
         self.frame_width = self.get_parameter("frame.width").value
-        self.declare_parameter("frame.height", 480.0)
+        self.declare_parameter("frame.height", 240.0)
         self.frame_height = self.get_parameter("frame.height").value
         # Gain eyes message
         self.declare_parameter("gain.eyes.x", 1)
