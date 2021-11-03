@@ -23,26 +23,19 @@ FROM dustynv/ros:foxy-ros-base-l4t-r32.6.1
 
 # Install OpenCV dependencies
 RUN apt-get update && \
-    apt-get install libjpeg-dev zlib1g-dev -y && \
+    apt-get install libjpeg-dev zlib1g-dev python3-vcstool python3-pip -y && \
+    pip3 install wheel && \
     rm -rf /var/lib/apt/lists/*
 
 ########### INSTALL ISAAC ROS ###########
 
 # Download and build nanosaur_isaac_ros
 ENV ISAAC_ROS_WS /opt/isaac_ros_ws
-RUN mkdir -p $ISAAC_ROS_WS/src
 # Copy wstool isaac_ros.rosinstall
 COPY nanosaur_isaac_ros/rosinstall/isaac_ros.rosinstall isaac_ros.rosinstall
 
-# Initialize ROS2 workspace
-RUN pip3 install wheel && \
-    pip3 install -U wstool && \
-    wstool init $ISAAC_ROS_WS/src && \
-    wstool merge -t $ISAAC_ROS_WS/src isaac_ros.rosinstall && \
-    wstool update -t $ISAAC_ROS_WS/src
-
-ADD libs/vpi1/ /usr/share/vpi1/
-ADD libs/nvidia/vpi1/ /opt/nvidia/vpi1/
+RUN mkdir -p ${ISAAC_ROS_WS}/src && \
+    vcs import ${ISAAC_ROS_WS}/src < isaac_ros.rosinstall
 
 # Load ROS2 sources
 RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
@@ -51,22 +44,15 @@ RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
     --cmake-args \
     -DCMAKE_BUILD_TYPE=Release
 
-# Remove VPI after build docker
-RUN rm -R /usr/share/vpi1/
-RUN rm -R /opt/nvidia/vpi1/
-
 ########### INSTALL NANOSAUR ISAAC ROS ###########
 
+ADD nanosaur_isaac_follower/requirements.txt requirements.txt
 # Download and build nanosaur_isaac_ros
 ENV ROS_WS /opt/ros_ws
-RUN mkdir -p $ROS_WS/src
-
-# Install python dependencies
-ADD nanosaur_isaac_follower/requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN mkdir -p $ROS_WS/src && \
+    pip3 install -r requirements.txt
 
 ADD . $ROS_WS/src/nanosaur_isaac_ros
-RUN rm -R $ROS_WS/src/nanosaur_isaac_ros/libs
 
 # Load ROS2 sources
 RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
@@ -84,9 +70,9 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Change workdir
 WORKDIR $ROS_WS
 # source ros package from entrypoint
-RUN sed --in-place --expression \
-      '$isource "$ROS_WS/install/setup.bash"' \
-      /ros_entrypoint.sh
+#RUN sed --in-place --expression \
+#      '$isource "$ROS_WS/install/setup.bash"' \
+#      /ros_entrypoint.sh
 # run ros package launch file
 CMD ["ros2", "launch", "nanosaur_isaac_follower", "isaac_follower.launch.py"]
 

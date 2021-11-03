@@ -3,10 +3,10 @@
     uri: https://github.com/rnanosaur/nanosaur.git
 - git:
     local-name: isaac_ros_common
-    uri: https://github.com/NVIDIA-AI-IOT/isaac_ros_common.git
+    uri: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common.git
 - git:
     local-name: isaac_ros_image_pipeline
-    uri: https://github.com/NVIDIA-AI-IOT/isaac_ros_image_pipeline.git
+    uri: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_image_pipeline.git
 - git:
     local-name: isaac_ros_apriltag
-    uri: https://github.com/NVIDIA-AI-IOT/isaac_ros_apriltag.git
+    uri: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
