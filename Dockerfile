@@ -20,11 +20,21 @@
 
 # Jetpack 4.6
 FROM dustynv/ros:foxy-ros-base-l4t-r32.6.1
+# Configuration CUDA
+ARG CUDA=10.2
+ARG L4T=r32.6
+ARG TENSORRT=8
+ENV ROS_DISTRO=foxy
 
 # Install OpenCV dependencies
 RUN apt-get update && \
     apt-get install libjpeg-dev zlib1g-dev python3-vcstool python3-pip -y && \
     pip3 install wheel && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Git-LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && apt-get install -y git-lfs && \
     rm -rf /var/lib/apt/lists/*
 
 ########### INSTALL ISAAC ROS ###########
@@ -37,13 +47,6 @@ COPY nanosaur_isaac_ros/rosinstall/isaac_ros.rosinstall isaac_ros.rosinstall
 RUN mkdir -p ${ISAAC_ROS_WS}/src && \
     vcs import ${ISAAC_ROS_WS}/src < isaac_ros.rosinstall
 
-# Load ROS2 sources
-RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
-    cd $ISAAC_ROS_WS && \
-    colcon build --symlink-install \
-    --cmake-args \
-    -DCMAKE_BUILD_TYPE=Release
-
 ########### INSTALL NANOSAUR ISAAC ROS ###########
 
 ADD nanosaur_isaac_follower/requirements.txt requirements.txt
@@ -54,13 +57,18 @@ RUN mkdir -p $ROS_WS/src && \
 
 ADD . $ROS_WS/src/nanosaur_isaac_ros
 
-# Load ROS2 sources
-RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
-    . $ISAAC_ROS_WS/install/setup.sh && \
-    cd $ROS_WS && \
-    colcon build --symlink-install \
-    --cmake-args \
-    -DCMAKE_BUILD_TYPE=Release
+########### BUILD WITH CUDA ###########
+
+# Build on CUDA
+# Copy and run jetson_utils installer
+COPY nanosaur_isaac_ros/scripts/jetson_cuda.sh /opt/jetson_cuda.sh
+# Pass in order
+# CUDA ex. 10.2
+# L4T version ex. r32.5
+# TENSORRT ex. 7
+# ROS_DISTRO ex. foxy
+# ROS_WS ex. /opt/ros_ws
+RUN . /opt/jetson_cuda.sh ${CUDA} ${L4T} ${TENSORRT} ${ROS_DISTRO} ${ROS_WS} ${ISAAC_ROS_WS}
 
 # https://docs.docker.com/engine/reference/builder/#stopsignal
 # https://hynek.me/articles/docker-signals/
