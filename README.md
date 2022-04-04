@@ -1,6 +1,19 @@
 # 🍏 nanosaur_isaac_ros
 
-Nanosaur ISAAC ROS integration
+**THIS PROJECT IS ARCHIVED!**
+
+This demo introduce to [Isaac ROS](https://developer.nvidia.com/isaac-ros-gems) and show a demo with the Apriltag detection.
+
+Follow the blog post: [**Designing Robots with NVIDIA Isaac GEMs for ROS**](https://developer.nvidia.com/blog/designing-robots-with-isaac-gems-for-ros/)
+
+**Now nanosaur use natively [Isaac ROS](https://developer.nvidia.com/isaac-ros-gems), please follow [nanosaur_perception](https://github.com/rnanosaur/nanosaur_perception)**
+
+To learn more on Isaac ROS:
+ * https://developer.nvidia.com/isaac-ros-gems
+ * https://info.nvidia.com/isaac-ros-and-nvidia-jetson-wbn.html
+ * https://github.com/rbonghi/isaac_ros_tutorial
+
+![nanosaur follower](https://nanosaur.ai/assets/images/nanosaur_follower.jpg)
 
 # Develop
 
